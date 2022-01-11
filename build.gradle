@@ -19,7 +19,7 @@ dependencies {
 jar {
     manifest {
         attributes([
-                'Premain-Class': 'com.example.EntryPoint',
+                'Premain-Class': 'com.example.InstrumentingAgent',
                 'Can-Redefine-Classes': 'true',
                 'Can-Retransform-Classes': 'true'
         ])

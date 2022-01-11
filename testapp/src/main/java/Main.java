@@ -20,6 +20,12 @@ public class Main {
         }
 
         @Override
+        public void onEnvVarRead(String name) {
+            System.err.println("Reading environment variable " + name);
+            new Exception().printStackTrace();
+        }
+
+        @Override
         public void onSystemPropertyRead(String name, Object value) {
             System.err.println("Reading system property " + name);
             new Exception().printStackTrace();
@@ -34,7 +40,7 @@ public class Main {
             in.transferTo(System.out);
         }
 
-        System.err.println(System.getenv().get("WEDNESDAY"));
+        System.out.println("PATH=" + System.getenv().get("PATH"));
 
         System.out.println("some.int = " + Integer.getInteger("some.int"));
 

@@ -3,6 +3,10 @@ package com.example;
 import java.io.Closeable;
 import java.io.File;
 
+/**
+ * An entry point to be notified about "interesting methods being called". Its methods are called to actually broadcast
+ * these events too.
+ */
 public class Interceptor implements InterceptListener {
     private static final InterceptListener NO_OP = new InterceptListener() {
     };
@@ -43,12 +47,22 @@ public class Interceptor implements InterceptListener {
     }
 
     @Override
+    public void onEnvVarRead(String name) {
+        if (enableInterception) {
+            sPrimaryListener.onEnvVarRead(name);
+        }
+    }
+
+    @Override
     public void onSystemPropertyRead(String name, Object value) {
         if (enableInterception) {
             sPrimaryListener.onSystemPropertyRead(name, value);
         }
     }
 
+    /**
+     * A try-with-resources helper to call instrumented method without it being intercepted.
+     */
     public DisabledInterceptionScope withInterceptionDisabled() {
         return new DisabledInterceptionScope();
     }

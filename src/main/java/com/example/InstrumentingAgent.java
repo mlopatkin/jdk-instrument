@@ -6,12 +6,11 @@ import net.bytebuddy.matcher.ElementMatchers;
 
 import java.io.File;
 import java.lang.instrument.Instrumentation;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import static net.bytebuddy.matcher.ElementMatchers.*;
 
-public class EntryPoint {
+public class InstrumentingAgent {
     public static void premain(String agentArgs, Instrumentation inst) {
         new AgentBuilder.Default()
                 .with(AgentBuilder.RedefinitionStrategy.RETRANSFORMATION)
@@ -29,6 +28,7 @@ public class EntryPoint {
                 .with(AgentBuilder.RedefinitionStrategy.RETRANSFORMATION)
                 .with(AgentBuilder.InitializationStrategy.NoOp.INSTANCE)
                 .with(AgentBuilder.TypeStrategy.Default.REDEFINE)
+                // type - transform go in pair. First matching type predicate wins and applies its transform.
                 .type(ElementMatchers.named("java.io.FileInputStream"))
                 .transform((builder, type, classLoader, module) ->
                         builder
@@ -47,6 +47,9 @@ public class EntryPoint {
                 .installOn(inst);
     }
 
+    // Advice classes are defining the template but there is no way to say what method should be instrumented. This
+    // info has to be provided when configuring builder in the transform above. This means that we'll have quite a lot
+    // of Advice classes, almost one per instrumented method.
     public static class FisStringAdvice {
         @Advice.OnMethodEnter
         public static void constructorExit(@Advice.Argument(0) String path) {
@@ -64,18 +67,29 @@ public class EntryPoint {
     }
 
     public static class SystemAdvice {
-        @Advice.OnMethodExit()
+        // Advices can replace the return value of the method
+        @Advice.OnMethodExit
         public static void getenv(@Advice.Return(readOnly = false) Map<String, String> envMap) {
-            Map<String, String> newResult = new HashMap<>(envMap);
-            newResult.put("WEDNESDAY", "WHAT A WEEK");
             //noinspection UnusedAssignment
-            envMap = newResult;
+            envMap = new HashMap<>(envMap) {
+                @Override
+                public String get(Object key) {
+                    if (key instanceof String) {
+                        Interceptor.getInstance().onEnvVarRead((String) key);
+                    }
+                    return super.get(key);
+                }
+            };
         }
     }
 
     public static class IntegerAdvice {
+        // Advice can be applied to multiple methods, if the signatures are compatible. Here we intercept all three:
+        // Integer.getInteger(String)
+        // Integer.getInteger(String, int)
+        // Integer.getInteger(String, Integer)
         @Advice.OnMethodExit
-        public static void getEnter(@Advice.Argument(0) String key, @Advice.Return Integer value) {
+        public static void exitGetInteger(@Advice.Argument(0) String key, @Advice.Return Integer value) {
             Interceptor.getInstance().onSystemPropertyRead(key, value);
         }
     }
