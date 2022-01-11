@@ -53,6 +53,12 @@ public class InstrumentingAgent {
     public static class FisStringAdvice {
         @Advice.OnMethodEnter
         public static void constructorExit(@Advice.Argument(0) String path) {
+            // One pitfall there is that we are going to get interception twice, because FileInputStream(String)
+            // delegates to FileInputStream(File) internally.
+            // We could in theory report and disable interception in the beginning of the constructor and then re-enable
+            // interceprion again at the end, but exceptions complicate this. We cannot wrap the actual constructor code
+            // in try(withInterceptionDisabled()) {}, which is necessary to reliably restore the interception.
+            // See https://github.com/raphw/byte-buddy/issues/375
             Interceptor interceptor = Interceptor.getInstance();
             interceptor.onFileOpened(path);
         }
