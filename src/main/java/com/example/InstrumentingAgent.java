@@ -6,7 +6,7 @@ import net.bytebuddy.matcher.ElementMatchers;
 
 import java.io.File;
 import java.lang.instrument.Instrumentation;
-import java.util.*;
+import java.util.Map;
 
 import static net.bytebuddy.matcher.ElementMatchers.*;
 
@@ -77,15 +77,7 @@ public class InstrumentingAgent {
         @Advice.OnMethodExit
         public static void getenv(@Advice.Return(readOnly = false) Map<String, String> envMap) {
             //noinspection UnusedAssignment
-            envMap = new HashMap<>(envMap) {
-                @Override
-                public String get(Object key) {
-                    if (key instanceof String) {
-                        Interceptor.getInstance().onEnvVarRead((String) key);
-                    }
-                    return super.get(key);
-                }
-            };
+            envMap = new TrackHashMap(envMap);
         }
     }
 
