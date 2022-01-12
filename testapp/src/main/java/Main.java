@@ -1,3 +1,4 @@
+import com.example.InstrumentingAgent;
 import com.example.InterceptListener;
 import com.example.Interceptor;
 
@@ -33,6 +34,7 @@ public class Main {
     };
 
     public static void main(String[] args) throws Exception {
+        InstrumentingAgent.install();
         Interceptor.installListener(listener);
 
         try (FileInputStream fis = new FileInputStream("/dev/null")) {

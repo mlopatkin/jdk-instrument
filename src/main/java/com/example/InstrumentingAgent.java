@@ -1,5 +1,6 @@
 package com.example;
 
+import net.bytebuddy.agent.ByteBuddyAgent;
 import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.asm.Advice;
 import net.bytebuddy.matcher.ElementMatchers;
@@ -11,7 +12,19 @@ import java.util.Map;
 import static net.bytebuddy.matcher.ElementMatchers.*;
 
 public class InstrumentingAgent {
+    public static void agentmain(String agentArgs, Instrumentation inst) {
+        doMain(inst);
+    }
+
     public static void premain(String agentArgs, Instrumentation inst) {
+        doMain(inst);
+    }
+
+    public static void install() {
+        doMain(ByteBuddyAgent.install());
+    }
+
+    static void doMain(Instrumentation inst) {
         new AgentBuilder.Default()
                 .with(AgentBuilder.RedefinitionStrategy.RETRANSFORMATION)
                 .with(AgentBuilder.RedefinitionStrategy.Listener.StreamWriting.toSystemError())
@@ -79,6 +92,7 @@ public class InstrumentingAgent {
             //noinspection UnusedAssignment
             envMap = new TrackHashMap(envMap);
         }
+
     }
 
     public static class IntegerAdvice {
@@ -91,4 +105,5 @@ public class InstrumentingAgent {
             Interceptor.getInstance().onSystemPropertyRead(key, value);
         }
     }
+
 }
