@@ -1,0 +1,35 @@
+plugins {
+    id 'conventions.java'
+    id 'application'
+}
+
+configurations {
+    runtimeAgentJar {
+        canBeConsumed = false
+        canBeResolved = true
+    }
+
+    runtimeBootstrapJar {
+        canBeConsumed = false
+        canBeResolved = true
+    }
+}
+
+dependencies {
+    implementation(project(":test-core"))
+    implementation 'net.bytebuddy:byte-buddy-agent:1.12.6'
+
+    runtimeAgentJar(project(path: ":agent", configuration: "shadow"))
+    runtimeBootstrapJar(project(":interceptor"))
+}
+
+application {
+    mainClass = "Main"
+    applicationDefaultJvmArgs = [
+            "-Dcom.example.agent=${configurations.runtimeAgentJar.singleFile.path}",
+            "-Dcom.example.bootstrap=${configurations.runtimeBootstrapJar.singleFile.path}"]
+}
+
+tasks.named("run") {
+    dependsOn(configurations.runtimeAgentJar, configurations.runtimeBootstrapJar)
+}

@@ -6,13 +6,16 @@ import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.asm.Advice;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.instrument.Instrumentation;
 import java.util.Map;
+import java.util.jar.JarFile;
 
 import static net.bytebuddy.matcher.ElementMatchers.*;
 
 public class InstrumentingAgent {
-    public static void agentmain(String agentArgs, Instrumentation inst) {
+    public static void agentmain(String agentArgs, Instrumentation inst) throws IOException {
+        inst.appendToBootstrapClassLoaderSearch(new JarFile(System.getProperty("com.example.bootstrap")));
         doMain(inst);
     }
 

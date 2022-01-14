@@ -7,6 +7,8 @@ pluginManagement {
 rootProject.name = 'jdk-instrument'
 
 include 'test-app-premain-init'
+include 'test-app-runtime-init'
+
 include 'agent'
 include 'interceptor'
 include 'test-core'
