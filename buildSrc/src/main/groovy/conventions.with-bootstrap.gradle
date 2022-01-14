@@ -1,0 +1,40 @@
+configurations {
+    bootstrap {
+        canBeConsumed = false
+        canBeResolved = false
+    }
+
+    bootstrapClasspath {
+        extendsFrom(bootstrap)
+        canBeResolved = true
+        canBeConsumed = false
+    }
+}
+
+class BootstrapArgumentProvider implements CommandLineArgumentProvider {
+    private final Configuration conf
+
+    BootstrapArgumentProvider(Configuration conf) {
+        this.conf = conf
+    }
+
+    @Override
+    Iterable<String> asArguments() {
+        if (conf.isEmpty()) {
+            return Collections.emptyList()
+        }
+        return conf.resolve().collect {
+            "-Xbootclasspath/a:${it.path}"
+        }
+    }
+}
+
+tasks.withType(JavaExec) {
+    dependsOn(configurations.bootstrapClasspath)
+    jvmArgumentProviders.add(new BootstrapArgumentProvider(configurations.bootstrapClasspath))
+}
+
+tasks.withType(Test) {
+    dependsOn(configurations.bootstrapClasspath)
+    jvmArgumentProviders.add(new BootstrapArgumentProvider(configurations.bootstrapClasspath))
+}

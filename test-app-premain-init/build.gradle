@@ -1,0 +1,16 @@
+plugins {
+    id 'conventions.java'
+    id 'conventions.with-agent'
+    id 'conventions.with-bootstrap'
+    id 'application'
+}
+
+dependencies {
+    implementation(project(":test-core"))
+    agent(project(path: ":agent", configuration: "shadow"))
+    bootstrap(project(":interceptor"))
+}
+
+application {
+    mainClass = "Main"
+}

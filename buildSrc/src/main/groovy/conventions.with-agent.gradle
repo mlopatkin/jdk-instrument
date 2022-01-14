@@ -1,0 +1,40 @@
+configurations {
+    agent {
+        canBeConsumed = false
+        canBeResolved = false
+    }
+
+    agentClasspath {
+        extendsFrom(agent)
+        canBeResolved = true
+        canBeConsumed = false
+    }
+}
+
+class AgentArgumentProvider implements CommandLineArgumentProvider {
+    private final Configuration conf
+
+    AgentArgumentProvider(Configuration conf) {
+        this.conf = conf
+    }
+
+    @Override
+    Iterable<String> asArguments() {
+        if (conf.isEmpty()) {
+            return Collections.emptyList()
+        }
+        return conf.resolve().collect {
+            "-javaagent:${it.path}"
+        }
+    }
+}
+
+tasks.withType(JavaExec) {
+    dependsOn(configurations.agentClasspath)
+    jvmArgumentProviders.add new AgentArgumentProvider(configurations.agentClasspath)
+}
+
+tasks.withType(Test) {
+    dependsOn(configurations.agentClasspath)
+    jvmArgumentProviders.add new AgentArgumentProvider(configurations.agentClasspath)
+}

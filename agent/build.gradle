@@ -1,0 +1,20 @@
+plugins {
+    id 'conventions.java'
+    id("com.github.johnrengelman.shadow")
+}
+
+dependencies {
+    compileOnly(project(":interceptor"))
+    implementation 'net.bytebuddy:byte-buddy:1.12.6'
+}
+
+jar {
+    manifest {
+        attributes([
+                'Premain-Class': 'com.example.agent.InstrumentingAgent',
+                'Agent-Class': 'com.example.agent.InstrumentingAgent',
+                'Can-Redefine-Classes': 'true',
+                'Can-Retransform-Classes': 'true'
+        ])
+    }
+}

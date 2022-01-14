@@ -1,9 +1,9 @@
-package com.example;
+package com.example.agent;
 
-import net.bytebuddy.agent.ByteBuddyAgent;
+import com.example.interceptor.Interceptor;
+import com.example.interceptor.TrackHashMap;
 import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.asm.Advice;
-import net.bytebuddy.matcher.ElementMatchers;
 
 import java.io.File;
 import java.lang.instrument.Instrumentation;
@@ -20,16 +20,13 @@ public class InstrumentingAgent {
         doMain(inst);
     }
 
-    public static void install() {
-        doMain(ByteBuddyAgent.install());
-    }
-
-    static void doMain(Instrumentation inst) {
+    public static void doMain(Instrumentation inst) {
         new AgentBuilder.Default()
                 .with(AgentBuilder.RedefinitionStrategy.RETRANSFORMATION)
                 .with(AgentBuilder.RedefinitionStrategy.Listener.StreamWriting.toSystemError())
                 .with(AgentBuilder.Listener.StreamWriting.toSystemError().withTransformationsOnly())
                 .with(AgentBuilder.InstallationListener.StreamWriting.toSystemError())
+
                 .ignore(none())
                 .ignore(
                         nameStartsWith("net.bytebuddy.")
@@ -42,18 +39,18 @@ public class InstrumentingAgent {
                 .with(AgentBuilder.InitializationStrategy.NoOp.INSTANCE)
                 .with(AgentBuilder.TypeStrategy.Default.REDEFINE)
                 // type - transform go in pair. First matching type predicate wins and applies its transform.
-                .type(ElementMatchers.named("java.io.FileInputStream"))
+                .type(named("java.io.FileInputStream"))
                 .transform((builder, type, classLoader, module) ->
                         builder
                                 .visit(Advice.to(FisStringAdvice.class).on(
                                         isConstructor().and(takesArguments(String.class))))
                                 .visit(Advice.to(FisFileAdvice.class).on(
                                         isConstructor().and(takesArguments(File.class)))))
-                .type(ElementMatchers.named("java.lang.System"))
+                .type(named("java.lang.System"))
                 .transform((builder, type, classLoader, module) ->
                         builder
                                 .visit(Advice.to(SystemAdvice.class).on(named("getenv").and(takesArguments(0)))))
-                .type(ElementMatchers.named("java.lang.Integer"))
+                .type(named("java.lang.Integer"))
                 .transform((builder, type, classLoader, module) ->
                         builder
                                 .visit(Advice.to(IntegerAdvice.class).on(named("getInteger"))))
@@ -69,7 +66,7 @@ public class InstrumentingAgent {
             // One pitfall there is that we are going to get interception twice, because FileInputStream(String)
             // delegates to FileInputStream(File) internally.
             // We could in theory report and disable interception in the beginning of the constructor and then re-enable
-            // interceprion again at the end, but exceptions complicate this. We cannot wrap the actual constructor code
+            // interception again at the end, but exceptions complicate this. We cannot wrap the actual constructor code
             // in try(withInterceptionDisabled()) {}, which is necessary to reliably restore the interception.
             // See https://github.com/raphw/byte-buddy/issues/375
             Interceptor interceptor = Interceptor.getInstance();

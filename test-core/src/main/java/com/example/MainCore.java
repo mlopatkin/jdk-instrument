@@ -1,12 +1,13 @@
-import com.example.InstrumentingAgent;
-import com.example.InterceptListener;
-import com.example.Interceptor;
+package com.example;
+
+import com.example.interceptor.InterceptListener;
+import com.example.interceptor.Interceptor;
 
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 
-public class Main {
+public class MainCore {
     private static final InterceptListener listener = new InterceptListener() {
         @Override
         public void onFileOpened(File file) {
@@ -33,8 +34,7 @@ public class Main {
         }
     };
 
-    public static void main(String[] args) throws Exception {
-        InstrumentingAgent.install();
+    public static void doMain(String[] args) throws Exception {
         Interceptor.installListener(listener);
 
         try (FileInputStream fis = new FileInputStream("/dev/null")) {
