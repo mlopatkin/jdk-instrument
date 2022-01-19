@@ -60,6 +60,13 @@ public class Interceptor implements InterceptListener {
         }
     }
 
+    @Override
+    public void onUnifiedMapCreated() {
+        if (enableInterception) {
+            sPrimaryListener.onUnifiedMapCreated();
+        }
+    }
+
     /**
      * A try-with-resources helper to call instrumented method without it being intercepted.
      */

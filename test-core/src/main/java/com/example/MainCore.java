@@ -2,10 +2,13 @@ package com.example;
 
 import com.example.interceptor.InterceptListener;
 import com.example.interceptor.Interceptor;
+import org.eclipse.collections.impl.map.mutable.UnifiedMap;
 
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.util.Arrays;
+import java.util.Map;
 
 public class MainCore {
     private static final InterceptListener listener = new InterceptListener() {
@@ -32,6 +35,12 @@ public class MainCore {
             System.err.println("Reading system property " + name);
             new Exception().printStackTrace();
         }
+
+        @Override
+        public void onUnifiedMapCreated() {
+            System.err.println("Creaing unified map");
+            new Exception().printStackTrace();
+        }
     };
 
     public static void doMain(String[] args) throws Exception {
@@ -51,5 +60,12 @@ public class MainCore {
         }
 
         System.err.println("FIS classloader=" + FileInputStream.class.getClassLoader());
+
+        Map<String, String> map = new UnifiedMap<>();
+        map.put("some", "value");
+        System.err.println("UnifiedMap classloader=" + UnifiedMap.class.getClassLoader());
+        System.err.println("UnifiedMap signature=" + Arrays.toString(
+                UnifiedMap.class.getProtectionDomain().getCodeSource().getCodeSigners()));
+        System.err.println("UnifiedMap some=" + map.get("some"));
     }
 }

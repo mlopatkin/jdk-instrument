@@ -4,4 +4,6 @@ plugins {
 
 dependencies {
     compileOnly(project(":interceptor"))
+    // Eclipse collections is a great example of a signed JAR
+    implementation("org.eclipse.collections:eclipse-collections:11.0.0")
 }

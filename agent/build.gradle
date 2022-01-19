@@ -5,6 +5,8 @@ plugins {
 
 dependencies {
     compileOnly(project(":interceptor"))
+    // Intercept some calls to eclipse collections
+    compileOnly("org.eclipse.collections:eclipse-collections:11.0.0")
     implementation 'net.bytebuddy:byte-buddy:1.12.6'
 }
 

@@ -57,6 +57,10 @@ public class InstrumentingAgent {
                 .transform((builder, type, classLoader, module) ->
                         builder
                                 .visit(Advice.to(IntegerAdvice.class).on(named("getInteger"))))
+                .type(named("org.eclipse.collections.impl.map.mutable.UnifiedMap"))
+                .transform((builder, type, classLoader, module) ->
+                        builder
+                                .visit(Advice.to(UnifiedMapAdvice.class).on(isConstructor())))
                 .installOn(inst);
     }
 
@@ -103,6 +107,13 @@ public class InstrumentingAgent {
         @Advice.OnMethodExit
         public static void exitGetInteger(@Advice.Argument(0) String key, @Advice.Return Integer value) {
             Interceptor.getInstance().onSystemPropertyRead(key, value);
+        }
+    }
+
+    public static class UnifiedMapAdvice {
+        @Advice.OnMethodEnter
+        public static void unifiedMapConstructorEnter() {
+            Interceptor.getInstance().onUnifiedMapCreated();
         }
     }
 
