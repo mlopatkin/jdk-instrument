@@ -55,7 +55,7 @@ public class InstrumentingAgent {
                 .transform((builder, type, classLoader, module) ->
                         builder
                                 .visit(Advice.to(IntegerAdvice.class).on(named("getInteger"))))
-                .type(named("org.eclipse.collections.impl.map.mutable.UnifiedMap"))
+                .type(named(UnifiedMapAdvice.TARGET_CLASS_NAME))
                 .transform((builder, type, classLoader, module) ->
                         builder
                                 .visit(Advice.to(UnifiedMapAdvice.class).on(isConstructor())))

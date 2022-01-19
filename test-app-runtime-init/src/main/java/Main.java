@@ -7,6 +7,6 @@ public class Main {
     public static void main(String[] args) throws Exception {
         ByteBuddyAgent.attach(new File(System.getProperty("com.example.agent")),
                 ByteBuddyAgent.ProcessProvider.ForCurrentVm.INSTANCE);
-        MainCore.doMain(args);
+        MainCore.doMain();
     }
 }

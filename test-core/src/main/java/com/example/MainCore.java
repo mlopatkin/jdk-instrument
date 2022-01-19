@@ -43,7 +43,7 @@ public class MainCore {
         }
     };
 
-    public static void doMain(String[] args) throws Exception {
+    public static void doMain() throws Exception {
         Interceptor.installListener(listener);
 
         try (FileInputStream fis = new FileInputStream("/dev/null")) {

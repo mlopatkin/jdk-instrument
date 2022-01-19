@@ -12,5 +12,6 @@ include 'test-app-runtime-init'
 include 'agent'
 include 'interceptor'
 include 'test-core'
+include 'test-app-ondisk-instrument'
 include 'interceptor-advices'
 

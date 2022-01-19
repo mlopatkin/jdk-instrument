@@ -1,0 +1,28 @@
+plugins {
+    id 'conventions.java'
+    id 'application'
+}
+
+configurations {
+    nestedClasspath {
+        canBeConsumed = false
+        canBeResolved = true
+    }
+}
+
+dependencies {
+    implementation(project(":interceptor"))
+    implementation(project(":interceptor-advices"))
+    implementation("net.bytebuddy:byte-buddy:1.12.6")
+    nestedClasspath(project(":test-core"))
+}
+
+application {
+    mainClass = "Main"
+}
+
+
+tasks.named("run") {
+    dependsOn(configurations.nestedClasspath)
+    args(configurations.nestedClasspath.resolve().collect { it.getPath() })
+}
