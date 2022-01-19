@@ -1,14 +1,12 @@
 package com.example.agent;
 
-import com.example.interceptor.Interceptor;
-import com.example.interceptor.TrackHashMap;
+import com.example.interceptor.advices.*;
 import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.asm.Advice;
 
 import java.io.File;
 import java.io.IOException;
 import java.lang.instrument.Instrumentation;
-import java.util.Map;
 import java.util.jar.JarFile;
 
 import static net.bytebuddy.matcher.ElementMatchers.*;
@@ -62,59 +60,6 @@ public class InstrumentingAgent {
                         builder
                                 .visit(Advice.to(UnifiedMapAdvice.class).on(isConstructor())))
                 .installOn(inst);
-    }
-
-    // Advice classes are defining the template but there is no way to say what method should be instrumented. This
-    // info has to be provided when configuring builder in the transform above. This means that we'll have quite a lot
-    // of Advice classes, almost one per instrumented method.
-    public static class FisStringAdvice {
-        @Advice.OnMethodEnter
-        public static void constructorExit(@Advice.Argument(0) String path) {
-            // One pitfall there is that we are going to get interception twice, because FileInputStream(String)
-            // delegates to FileInputStream(File) internally.
-            // We could in theory report and disable interception in the beginning of the constructor and then re-enable
-            // interception again at the end, but exceptions complicate this. We cannot wrap the actual constructor code
-            // in try(withInterceptionDisabled()) {}, which is necessary to reliably restore the interception.
-            // See https://github.com/raphw/byte-buddy/issues/375
-            Interceptor interceptor = Interceptor.getInstance();
-            interceptor.onFileOpened(path);
-        }
-    }
-
-    public static class FisFileAdvice {
-        @Advice.OnMethodEnter
-        public static void constructorExit(@Advice.Argument(0) File file) {
-            Interceptor interceptor = Interceptor.getInstance();
-            interceptor.onFileOpened(file);
-        }
-    }
-
-    public static class SystemAdvice {
-        // Advices can replace the return value of the method
-        @Advice.OnMethodExit
-        public static void getenv(@Advice.Return(readOnly = false) Map<String, String> envMap) {
-            //noinspection UnusedAssignment
-            envMap = new TrackHashMap(envMap);
-        }
-
-    }
-
-    public static class IntegerAdvice {
-        // Advice can be applied to multiple methods, if the signatures are compatible. Here we intercept all three:
-        // Integer.getInteger(String)
-        // Integer.getInteger(String, int)
-        // Integer.getInteger(String, Integer)
-        @Advice.OnMethodExit
-        public static void exitGetInteger(@Advice.Argument(0) String key, @Advice.Return Integer value) {
-            Interceptor.getInstance().onSystemPropertyRead(key, value);
-        }
-    }
-
-    public static class UnifiedMapAdvice {
-        @Advice.OnMethodEnter
-        public static void unifiedMapConstructorEnter() {
-            Interceptor.getInstance().onUnifiedMapCreated();
-        }
     }
 
 }

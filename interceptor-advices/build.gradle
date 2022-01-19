@@ -1,0 +1,8 @@
+plugins {
+    id 'conventions.java'
+}
+
+dependencies {
+    compileOnly(project(":interceptor"))
+    implementation 'net.bytebuddy:byte-buddy:1.12.6'
+}
