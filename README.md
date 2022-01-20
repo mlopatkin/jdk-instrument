@@ -13,6 +13,8 @@ The project is structured as follows:
     observe the instrumented calls registers callbacks into it too.
  - `interceptor-advices` - ByteBuddy advices used to declare how to instrument classes. These are used in both agent
     based and classloader-based instrumentations, though the latter cannot instrument JDK classes.
+ - `test-app-classloader-instrument` - an implementaton that uses a custom classloader to instrument classes as they 
+    are loaded.
  - `test-app-premain-init` - a launcher that configures agent and bootclasspath with command-line switches.
  - `test-app-runtime-init` - a launcher that installs agent and bootclasspath at runtime.
  - `test-app-ondisk-instument` - instruments JAR files on disk and then loads them at runtime. As the signed JAR is

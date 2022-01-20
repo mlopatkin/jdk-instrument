@@ -14,4 +14,5 @@ include 'interceptor'
 include 'test-core'
 include 'test-app-ondisk-instrument'
 include 'interceptor-advices'
+include 'test-app-classloader-instrument'
 
